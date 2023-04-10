@@ -37,3 +37,5 @@ lerna-debug.log*
 .ash_history
 
 .npm
+
+data

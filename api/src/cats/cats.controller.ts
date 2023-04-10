@@ -7,10 +7,12 @@ import {
   Req,
   Param,
   Body,
+  Delete,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { CreateCatDto } from './dto/cats.dto.js';
 import { CatsService } from './cats.service.js';
+import { Cat } from './cat.entity.js';
 
 @Controller('cats')
 export class CatsController {
@@ -19,18 +21,23 @@ export class CatsController {
   @Post()
   @HttpCode(201)
   @Header('Cache-Control', 'none')
-  async create(@Body() createCatDto: CreateCatDto) {
-    this.catsService.create(createCatDto);
+  async create(@Body() createCatDto: CreateCatDto): Promise<Cat> {
+    return this.catsService.create(createCatDto);
   }
 
   @Get()
-  findAll(@Req() request: Request) {
-    this.catsService.findAll();
+  findAll(@Req() request: Request): Promise<Cat[]> {
+    return this.catsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param() params): string {
+  findOne(@Param() params): Promise<Cat> {
     console.log(params.id);
-    return `This action returns a #${params.id} cat`;
+    return this.catsService.findOne(params.id);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string): Promise<void> {
+    return this.catsService.remove(id);
   }
 }
