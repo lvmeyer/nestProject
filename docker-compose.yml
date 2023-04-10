@@ -17,3 +17,5 @@ services:
       - |
         npm install
         npm run start:dev
+
+# npm i @nestjs/cli --save-dev
