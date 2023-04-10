@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  node:
+    image: node:19.0.0-alpine
+    user: node
+    tty: true
+    stdin_open: true
+    working_dir: /home/api/
+    ports:
+      - 3000:3000
+    volumes:
+      - ./api:/home/api/
+    command:
+      - sh
+      - -c
+      - |
+        npm install
+        npm run start:dev
