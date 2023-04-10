@@ -10,20 +10,22 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { CreateCatDto } from './dto/cats.dto.js';
+import { CatsService } from './cats.service.js';
 
 @Controller('cats')
 export class CatsController {
+  constructor(private catsService: CatsService) {}
+
   @Post()
   @HttpCode(201)
   @Header('Cache-Control', 'none')
-  create(@Body() createCatDto: CreateCatDto): string {
-    console.log(createCatDto);
-    return 'This action adds a new cat';
+  async create(@Body() createCatDto: CreateCatDto) {
+    this.catsService.create(createCatDto);
   }
 
   @Get()
-  findAll(@Req() request: Request): string {
-    return 'This action returns all cats';
+  findAll(@Req() request: Request) {
+    this.catsService.findAll();
   }
 
   @Get(':id')
