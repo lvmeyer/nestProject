@@ -1,5 +1,4 @@
-
-.PHONY: dev
+.PHONY: dev test stop
 
 
 dev:
@@ -7,3 +6,6 @@ dev:
 
 test:
 	docker-compose exec node npm run test
+
+stop:
+	docker-compose down --volumes
