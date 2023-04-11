@@ -6,9 +6,9 @@ import {
   Post,
   Delete,
   HttpCode,
-  HttpException,
-  HttpStatus,
   Patch,
+  ValidationPipe,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { PostsService } from './posts.service.js';
 import { CreatePostDto, UpdatePostDto } from './dto/posts.dto.js';
@@ -21,43 +21,25 @@ export class PostsController {
   @Post()
   @HttpCode(201)
   async create(
-    @Body() createPostDto: CreatePostDto,
-  ): Promise<{ success: boolean; message: PostEntity }> {
-    if (
-      !createPostDto.title ||
-      !createPostDto.body ||
-      typeof createPostDto.title !== 'string' ||
-      typeof createPostDto.body !== 'string' ||
-      createPostDto.title.length > 50
-    ) {
-      throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);
-    }
+    @Body(ValidationPipe) createPostDto: CreatePostDto, //@Body(ValidationPipe))
+  ): Promise<{ success: boolean; message: string }> {
+    await this.postsService.create(createPostDto);
 
-    const post = await this.postsService.create(createPostDto);
-
-    return { success: true, message: post };
+    return { success: true, message: 'Created' };
   }
 
   @Patch(':id')
   @HttpCode(200)
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string, // @Param('id', new ParseUUIDPipe())
     @Body() updatePostDto: UpdatePostDto,
-  ): Promise<PostEntity> {
-    const isRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!isRegex.test(id)) {
-      throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);
-    }
-    try {
-      const post = await this.postsService.update(id, updatePostDto);
-      if (!post) {
-        throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-      }
-      return post;
-    } catch (e) {
-      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-    }
+  ): Promise<{ success: boolean; message: string }> {
+    await this.postsService.update(id, updatePostDto);
+
+    return {
+      success: true,
+      message: 'Updated',
+    };
   }
 
   @Get()
@@ -69,34 +51,19 @@ export class PostsController {
   @Get(':id')
   @HttpCode(200)
   async findOne(@Param('id') id: string): Promise<PostEntity> {
-    const isRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!isRegex.test(id)) {
-      throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);
-    }
-    try {
-      const post = await this.postsService.findOne(id);
-      if (!post) {
-        throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-      }
-      return post;
-    } catch (e) {
-      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-    }
+    return this.postsService.findOne(id);
   }
 
   @Delete(':id')
-  @HttpCode(204)
-  async remove(@Param('id') id: string): Promise<void> {
-    const isRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!isRegex.test(id)) {
-      throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);
-    }
-    try {
-      await this.postsService.remove(id);
-    } catch (e) {
-      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-    }
+  @HttpCode(200)
+  async remove(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<{ success: boolean; message: string }> {
+    await this.postsService.remove(id);
+
+    return {
+      success: true,
+      message: 'Deleted',
+    };
   }
 }
